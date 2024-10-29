@@ -1,7 +1,6 @@
 version: "3.8"
 
 services:
-  # Banco de dados MySQL
   db:
     image: mysql:8.0
     container_name: profile_db
@@ -11,11 +10,9 @@ services:
       MYSQL_USER: "user"
       MYSQL_PASSWORD: "123"
     ports:
-      - "3307:3306" # Exponha a porta 3306 no container como 3307 no host
+      - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
-
-  # API em Node.js
   api:
     image: node:20.18.0-alpine
     container_name: profile_api
@@ -36,8 +33,6 @@ services:
       - "3000:3000"
     depends_on:
       - db
-
-  # Frontend em React com Vite
   web:
     image: node:20.18.0-alpine
     container_name: profile_web
