@@ -1,0 +1,60 @@
+version: "3.8"
+
+services:
+  # Banco de dados MySQL
+  db:
+    image: mysql:8.0
+    container_name: profile_db
+    environment:
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_DATABASE: "profile"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "123"
+    ports:
+      - "3307:3306" # Exponha a porta 3306 no container como 3307 no host
+    volumes:
+      - db_data:/var/lib/mysql
+
+  # API em Node.js
+  api:
+    image: node:20.18.0-alpine
+    container_name: profile_api
+    working_dir: /app
+    volumes:
+      - ./backend:/app
+    environment:
+      DATABASE_URL: "mysql://user:123@db:3306/profile"
+      JWT_SECRET: "6bd871bdfdb0241af4c8d4aabfda312585b5f2ae309066e86d605334da32fa31"
+    command: >
+      sh -c "
+      apk add --no-cache git &&
+      git clone https://github.com/NodeExpress-React/profile_api.git . &&
+      npm install &&
+      node --watch server.js
+      "
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+
+  # Frontend em React com Vite
+  web:
+    image: node:20.18.0-alpine
+    container_name: profile_web
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    command: >
+      sh -c "
+      apk add --no-cache git &&
+      git clone https://github.com/NodeExpress-React/profile_web.git . &&
+      npm install &&
+      npm run dev
+      "
+    ports:
+      - "5173:5173"
+    depends_on:
+      - api
+
+volumes:
+  db_data:
